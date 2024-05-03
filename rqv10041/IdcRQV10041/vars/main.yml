@@ -1,0 +1,5 @@
+---
+# vars file for IdcRQV10041
+IdcRQV10041: 
+    - topic : "balance-adjustment-producer-topic"
+    - target: "balance-adjustment-consumer-topic"

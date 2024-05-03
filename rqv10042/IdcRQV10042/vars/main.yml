@@ -1,0 +1,5 @@
+---
+# vars file for IdcRQV10042
+IdcRQV10042: 
+    - topic : "PASS-Susbsciption-producer-topic"
+    - target: "PASS-Susbsciption-consumer-topic"

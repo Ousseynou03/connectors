@@ -1,0 +1,5 @@
+---
+# vars file for IdcRQV10043
+IdcRQV10043: 
+    - topic : "CustomerLevelRequest"
+    - target: "CustomerLevelResponse"

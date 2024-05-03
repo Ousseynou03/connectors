@@ -1,0 +1,94 @@
+---
+# tasks file for IdcRQV3004
+  - name: create topics 
+    command: /kafka/bin/kafka-topics.sh --bootstrap-server {{ ansible_host }}:9092 --create --topic {{ item }} --command-config /kafka/sasl/admin.properties
+    loop:
+      - "{{ vars.IdcRQV3004[0].topic }}"
+      - "{{ vars.IdcRQV3004[1].target }}"
+    run_once: true
+    delegate_to: brokerk1
+
+  - name: Creates directory of the IdcRQV3004
+    ansible.builtin.file:
+      path: /kafka/connectors/
+      state: directory
+      mode: u=rwx,g=rwx,o=r
+
+
+  - name: Creates directory of config IdcRQV3004
+    ansible.builtin.file:
+      path: /kafka/config_connector/
+      state: directory
+      mode: u=rwx,g=rwx,o=r
+
+  - name: Creates directory of the services config
+    ansible.builtin.file:
+      path: /kafka/services_config/
+      state: directory
+      mode: u=rwx,g=rwx,o=r
+
+
+  - name: Config of the IdcRQV3004 
+    ansible.builtin.copy:
+      src: files/config_connector/IdcRQV3004.json
+      dest: /kafka/config_connector/
+      mode: u=rw,g=rw,o=r
+
+  - name: Config provider  
+    ansible.builtin.copy:
+      src: files/config_connector/IdcRQV3004.properties
+      dest: /kafka/config_connector/
+      mode: u=rw,g=rw,o=r
+
+  - name: send IdcRQV3004 plugin
+    ansible.builtin.copy:
+      src: "files/connectors/IdcRQV3004.zip"
+      dest: /kafka/connectors/
+      mode: u=rwx,g=r,o=r
+      owner: kafka
+
+  - name: Extract IdcRQV3004 archive
+    ansible.builtin.unarchive:
+      src: /kafka/connectors/IdcRQV3004.zip
+      dest: /kafka/connectors/
+      remote_src: yes
+    
+  - name: Remove file connector IdcRQV3004 zip
+    ansible.builtin.file:
+      path: /kafka/connectors/IdcRQV3004.zip
+      state: absent
+  
+  - name: send IdcRQV3004 service config
+    ansible.builtin.copy:
+      src: "files/services_config/IdcRQV3004.zip"
+      dest: /kafka/services_config/
+      mode: u=rwx,g=r,o=r
+      owner: kafka
+
+  - name: Extract service config archive
+    ansible.builtin.unarchive:
+      src: /kafka/services_config/IdcRQV3004.zip
+      dest: /kafka/services_config/
+      remote_src: yes
+
+  - name: Remove file services_config IdcRQV3004 zip
+    ansible.builtin.file:
+      path: /kafka/services_config/IdcRQV3004.zip
+      state: absent
+
+  - name: restart kafkaConnect service
+    command: sudo systemctl restart kafkaconnect
+  
+  - name: Check if port 8083 is up
+    wait_for:
+      host: "{{ ansible_host }}"  
+      port: 8083
+      state: started
+
+  - name: deploy the connector IdcRQV3004 
+    command: curl -u idc:indatacore -d @/kafka/config_connector/IdcRQV3004.json -H "Content-Type:application/json" -X POST http://{{ ansible_host }}:8083/connectors/
+    run_once: true
+    delegate_to: brokerk1
+
+
+
