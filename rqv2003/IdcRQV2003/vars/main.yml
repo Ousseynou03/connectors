@@ -1,0 +1,5 @@
+---
+# vars file for IdcRQV2003
+IdcRQV2003: 
+    - topic : "RQV2003-producer-topic"
+    - target: "RQV2003-consumer-topic"

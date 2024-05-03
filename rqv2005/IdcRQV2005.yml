@@ -1,0 +1,5 @@
+---
+- name: run IdcRQV2005 Playbook
+  hosts: kafka
+  roles: 
+    - IdcRQV2005
